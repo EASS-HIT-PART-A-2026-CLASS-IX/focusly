@@ -1,9 +1,21 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
+from app.db import create_db_and_tables
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+
 
 app = FastAPI(
     title="Focusly",
     description="Smart Daily Planner for Students",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
