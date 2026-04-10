@@ -2,8 +2,8 @@ from typing import Optional
 
 from sqlmodel import Session, select
 
-from app.models import Category, Priority, Status, Task
-from app.schemas import TaskCreate, TaskUpdate
+from app.models import Category, Priority, Status, Task, UserPreferences
+from app.schemas import PreferencesCreate, PreferencesUpdate, TaskCreate, TaskUpdate
 
 
 # ── Task repository ───────────────────────────────────────────────────────────
@@ -48,4 +48,37 @@ def update_task(db: Session, task: Task, data: TaskUpdate) -> Task:
 
 def delete_task(db: Session, task: Task) -> None:
     db.delete(task)
+    db.commit()
+
+
+# ── UserPreferences repository ────────────────────────────────────────────────
+
+def get_preferences(db: Session, pref_id: int) -> Optional[UserPreferences]:
+    return db.get(UserPreferences, pref_id)
+
+
+def list_preferences(db: Session) -> list[UserPreferences]:
+    return list(db.exec(select(UserPreferences)).all())
+
+
+def create_preferences(db: Session, data: PreferencesCreate) -> UserPreferences:
+    prefs = UserPreferences.model_validate(data)
+    db.add(prefs)
+    db.commit()
+    db.refresh(prefs)
+    return prefs
+
+
+def update_preferences(db: Session, prefs: UserPreferences, data: PreferencesUpdate) -> UserPreferences:
+    updates = data.model_dump(exclude_unset=True)
+    for key, value in updates.items():
+        setattr(prefs, key, value)
+    db.add(prefs)
+    db.commit()
+    db.refresh(prefs)
+    return prefs
+
+
+def delete_preferences(db: Session, prefs: UserPreferences) -> None:
+    db.delete(prefs)
     db.commit()

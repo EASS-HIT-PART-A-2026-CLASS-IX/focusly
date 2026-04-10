@@ -4,15 +4,20 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlmodel import Session
 
-from app.models import Category, Priority, Status, Task
+from app.models import Category, Priority, Status, Task, UserPreferences
 from app.repositories import (
+    create_preferences,
     create_task,
+    delete_preferences,
     delete_task,
+    get_preferences,
     get_task,
+    list_preferences,
     list_tasks,
+    update_preferences,
     update_task,
 )
-from app.schemas import TaskCreate, TaskUpdate
+from app.schemas import PreferencesCreate, PreferencesUpdate, TaskCreate, TaskUpdate
 
 
 # ── Task service ──────────────────────────────────────────────────────────────
@@ -46,3 +51,30 @@ def service_update_task(db: Session, task_id: int, data: TaskUpdate) -> Task:
 def service_delete_task(db: Session, task_id: int) -> None:
     task = service_get_task(db, task_id)
     delete_task(db, task)
+
+
+# ── UserPreferences service ───────────────────────────────────────────────────
+
+def service_list_preferences(db: Session) -> list[UserPreferences]:
+    return list_preferences(db)
+
+
+def service_get_preferences(db: Session, pref_id: int) -> UserPreferences:
+    prefs = get_preferences(db, pref_id)
+    if prefs is None:
+        raise HTTPException(status_code=404, detail=f"Preferences {pref_id} not found")
+    return prefs
+
+
+def service_create_preferences(db: Session, data: PreferencesCreate) -> UserPreferences:
+    return create_preferences(db, data)
+
+
+def service_update_preferences(db: Session, pref_id: int, data: PreferencesUpdate) -> UserPreferences:
+    prefs = service_get_preferences(db, pref_id)
+    return update_preferences(db, prefs, data)
+
+
+def service_delete_preferences(db: Session, pref_id: int) -> None:
+    prefs = service_get_preferences(db, pref_id)
+    delete_preferences(db, prefs)

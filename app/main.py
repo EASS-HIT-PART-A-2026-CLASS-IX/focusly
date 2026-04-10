@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db import create_db_and_tables
-from app.routers import tasks
+from app.routers import preferences, tasks
 
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ app = FastAPI(
 )
 
 app.include_router(tasks.router)
+app.include_router(preferences.router)
 
 
 @app.get("/health")
