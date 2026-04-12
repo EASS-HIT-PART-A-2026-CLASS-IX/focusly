@@ -4,26 +4,33 @@ import ConfirmDialog from '../common/ConfirmDialog'
 import { formatMinutes, formatDate } from '../../utils/formatters'
 
 const CATEGORY_ACCENT: Record<string, string> = {
-  study:    '#3b82f6',
-  work:     '#22c55e',
-  leisure:  '#f59e0b',
-  personal: '#a855f7',
+  study:    '#546B41',
+  work:     '#99AD7A',
+  leisure:  '#b5a080',
+  personal: '#7a8c6a',
+}
+
+const CATEGORY_DOT: Record<string, string> = {
+  study:    '#4a7fc1',
+  work:     '#4a8c5c',
+  leisure:  '#d4943a',
+  personal: '#9b59b6',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
   study: 'Study', work: 'Work', leisure: 'Leisure', personal: 'Personal',
 }
 
-const PRIORITY_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  high:   { color: '#dc2626', bg: '#fee2e2', label: 'High' },
-  medium: { color: '#d97706', bg: '#fef3c7', label: 'Medium' },
-  low:    { color: '#16a34a', bg: '#dcfce7', label: 'Low' },
+const PRIORITY_CONFIG: Record<string, { color: string; bg: string; dot: string; label: string }> = {
+  high:   { color: '#7a3b2e', bg: '#f5e8e4', dot: '#e05252', label: 'High' },
+  medium: { color: '#8a6a2a', bg: '#f5edda', dot: '#d4943a', label: 'Medium' },
+  low:    { color: '#3d5130', bg: '#eef3e8', dot: '#4a8c5c', label: 'Low' },
 }
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; dot: string; label: string }> = {
-  todo:        { color: '#475569', bg: '#f1f5f9', dot: '#94a3b8', label: 'To Do' },
-  in_progress: { color: '#1d4ed8', bg: '#dbeafe', dot: '#3b82f6', label: 'In Progress' },
-  done:        { color: '#15803d', bg: '#dcfce7', dot: '#22c55e', label: 'Done' },
+  todo:        { color: '#5a6050', bg: '#f0ede6', dot: '#a0a890',  label: 'To Do' },
+  in_progress: { color: '#3d5130', bg: '#e4eedd', dot: '#99AD7A',  label: 'In Progress' },
+  done:        { color: '#2e4a24', bg: '#d8e8d0', dot: '#546B41',  label: 'Done' },
 }
 
 const EditIcon = () => (
@@ -82,6 +89,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }: Pro
           </h3>
           <span style={{
             flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', gap: 5,
             padding: '3px 10px',
             borderRadius: 'var(--radius-pill)',
             background: priority.bg,
@@ -90,6 +98,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }: Pro
             fontWeight: 700,
             letterSpacing: '0.02em',
           }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: priority.dot, display: 'inline-block', flexShrink: 0 }} />
             {priority.label}
           </span>
         </div>
@@ -136,7 +145,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }: Pro
             fontSize: 'var(--text-xs)',
             fontWeight: 600,
           }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: accent, display: 'inline-block', flexShrink: 0 }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: CATEGORY_DOT[task.category] ?? accent, display: 'inline-block', flexShrink: 0 }} />
             {CATEGORY_LABEL[task.category]}
           </span>
         </div>
