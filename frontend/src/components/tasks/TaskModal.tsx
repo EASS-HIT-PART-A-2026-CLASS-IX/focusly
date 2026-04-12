@@ -26,10 +26,11 @@ export default function TaskModal({ task, open, onClose, onSave }: Props) {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
+        className="confirm-dialog-enter"
         style={{
           background: 'var(--surface)',
           borderRadius: 'var(--radius-lg)',
-          box_shadow: 'var(--shadow-lg)',
+          boxShadow: 'var(--shadow-lg)',
           width: '100%',
           maxWidth: 560,
           maxHeight: '90vh',

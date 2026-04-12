@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useTaskCount } from '../../context/TaskCountContext'
 
 const DashboardIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,6 +24,8 @@ const PreferencesIcon = () => (
 )
 
 export default function Sidebar() {
+  const { count } = useTaskCount()
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -38,6 +41,9 @@ export default function Sidebar() {
         <NavLink to="/tasks">
           <TasksIcon />
           Tasks
+          {count > 0 && (
+            <span className="sidebar-badge">{count}</span>
+          )}
         </NavLink>
         <NavLink to="/preferences">
           <PreferencesIcon />

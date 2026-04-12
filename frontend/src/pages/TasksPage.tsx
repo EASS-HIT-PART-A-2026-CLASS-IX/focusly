@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTasks } from '../hooks/useTasks'
 import { useToast } from '../context/ToastContext'
+import { useTaskCount } from '../context/TaskCountContext'
 import { exportTasksToCSV } from '../utils/exporters'
 import type { TaskCreate, TaskFilters, TaskRead } from '../types'
 import FilterBar from '../components/tasks/FilterBar'
@@ -13,6 +14,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner'
 export default function TasksPage() {
   const { tasks, loading, fetchTasks, addTask, editTask, removeTask } = useTasks()
   const { addToast } = useToast()
+  const { setCount } = useTaskCount()
   const [filters, setFilters] = useState<TaskFilters>({})
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskRead | undefined>(undefined)
@@ -20,6 +22,10 @@ export default function TasksPage() {
   useEffect(() => {
     fetchTasks(filters).catch(e => addToast((e as Error).message, 'error'))
   }, [filters]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setCount(tasks.length)
+  }, [tasks.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function openCreate() {
     setEditingTask(undefined)
@@ -109,6 +115,7 @@ export default function TasksPage() {
         />
       ) : (
         <div
+          className="fade-up"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',

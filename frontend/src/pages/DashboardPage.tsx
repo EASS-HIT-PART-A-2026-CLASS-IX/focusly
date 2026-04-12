@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTasks } from '../hooks/useTasks'
 import { usePreferences } from '../hooks/usePreferences'
+import { useTaskCount } from '../context/TaskCountContext'
 import StatCard from '../components/dashboard/StatCard'
 import RecentTasks from '../components/dashboard/RecentTasks'
 import LoadingSpinner from '../components/common/LoadingSpinner'
@@ -15,11 +16,16 @@ function getGreeting(): string {
 export default function DashboardPage() {
   const { tasks, loading, fetchTasks } = useTasks()
   const { prefs, fetchPrefs } = usePreferences()
+  const { setCount } = useTaskCount()
 
   useEffect(() => {
     fetchTasks()
     fetchPrefs()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setCount(tasks.length)
+  }, [tasks.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const total       = tasks.length
   const inProgress  = tasks.filter(t => t.status === 'in_progress').length
