@@ -1,0 +1,3 @@
+/* placeholder — full design system added in commit 4 */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, sans-serif; }
