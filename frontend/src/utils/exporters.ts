@@ -1,11 +1,18 @@
 import type { TaskRead } from '../types'
 
-export function exportTasksToCSV(tasks: TaskRead[]): void {
-  const headers = [
-    'ID', 'Title', 'Description', 'Category', 'Priority', 'Status',
-    'Estimated Minutes', 'Deadline', 'Energy Required', 'Created At',
-  ]
+const CSV_HEADERS = [
+  'ID', 'Title', 'Description', 'Category', 'Priority', 'Status',
+  'Estimated Minutes', 'Deadline', 'Energy Required', 'Created At',
+]
 
+function escapeCSV(val: string | number): string {
+  const str = String(val)
+  return str.includes(',') || str.includes('"') || str.includes('\n')
+    ? `"${str.replace(/"/g, '""')}"`
+    : str
+}
+
+export function buildCSV(tasks: TaskRead[]): string {
   const rows = tasks.map(t => [
     t.id,
     t.title,
@@ -19,18 +26,14 @@ export function exportTasksToCSV(tasks: TaskRead[]): void {
     t.created_at.slice(0, 10),
   ])
 
-  const escape = (val: string | number) => {
-    const str = String(val)
-    return str.includes(',') || str.includes('"') || str.includes('\n')
-      ? `"${str.replace(/"/g, '""')}"`
-      : str
-  }
-
-  const csv = [
-    headers.join(','),
-    ...rows.map(row => row.map(escape).join(',')),
+  return [
+    CSV_HEADERS.join(','),
+    ...rows.map(row => row.map(escapeCSV).join(',')),
   ].join('\n')
+}
 
+export function exportTasksToCSV(tasks: TaskRead[]): void {
+  const csv  = buildCSV(tasks)
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const url  = URL.createObjectURL(blob)
   const link = document.createElement('a')
