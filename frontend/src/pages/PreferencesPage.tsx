@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { usePreferences } from '../hooks/usePreferences'
+import { useToast } from '../context/ToastContext'
 import { formatHour } from '../utils/formatters'
 import type { PeakFocusTime } from '../types'
 import LoadingSpinner from '../components/common/LoadingSpinner'
@@ -46,8 +47,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function PreferencesPage() {
   const { prefs, loading, error, fetchPrefs, savePrefs } = usePreferences()
+  const { addToast } = useToast()
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
   // form fields
@@ -104,8 +105,7 @@ export default function PreferencesPage() {
         preferred_break_minutes: breakNum,
         peak_focus_time: peakFocus,
       })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+      addToast('Preferences saved', 'success')
     } catch (err) {
       setFormError((err as Error).message)
     } finally {
@@ -249,16 +249,9 @@ export default function PreferencesPage() {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-          <Button type="submit" variant="primary" disabled={saving}>
-            {saving ? 'Saving…' : prefs ? 'Save Changes' : 'Create Profile'}
-          </Button>
-          {saved && (
-            <span style={{ fontSize: 'var(--text-sm)', color: '#10b981', fontWeight: 500 }}>
-              ✓ Saved!
-            </span>
-          )}
-        </div>
+        <Button type="submit" variant="primary" disabled={saving}>
+          {saving ? 'Saving…' : prefs ? 'Save Changes' : 'Create Profile'}
+        </Button>
       </form>
     </div>
   )

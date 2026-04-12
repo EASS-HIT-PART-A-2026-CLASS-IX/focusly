@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTasks } from '../hooks/useTasks'
+import { useToast } from '../context/ToastContext'
 import type { TaskCreate, TaskFilters, TaskRead } from '../types'
 import FilterBar from '../components/tasks/FilterBar'
 import TaskCard from '../components/tasks/TaskCard'
@@ -9,13 +10,14 @@ import EmptyState from '../components/common/EmptyState'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 
 export default function TasksPage() {
-  const { tasks, loading, error, fetchTasks, addTask, editTask, removeTask } = useTasks()
+  const { tasks, loading, fetchTasks, addTask, editTask, removeTask } = useTasks()
+  const { addToast } = useToast()
   const [filters, setFilters] = useState<TaskFilters>({})
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskRead | undefined>(undefined)
 
   useEffect(() => {
-    fetchTasks(filters)
+    fetchTasks(filters).catch(e => addToast((e as Error).message, 'error'))
   }, [filters]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function openCreate() {
@@ -34,16 +36,36 @@ export default function TasksPage() {
   }
 
   async function handleSave(data: TaskCreate) {
-    if (editingTask) {
-      await editTask(editingTask.id, data)
-    } else {
-      await addTask(data)
+    try {
+      if (editingTask) {
+        await editTask(editingTask.id, data)
+        addToast('Task updated', 'success')
+      } else {
+        await addTask(data)
+        addToast('Task created', 'success')
+      }
+      closeModal()
+    } catch (e) {
+      addToast((e as Error).message, 'error')
     }
-    closeModal()
   }
 
   async function handleStatusChange(id: number, status: TaskRead['status']) {
-    await editTask(id, { status })
+    try {
+      await editTask(id, { status })
+      if (status === 'done') addToast('Task marked as done', 'success')
+    } catch (e) {
+      addToast((e as Error).message, 'error')
+    }
+  }
+
+  async function handleDelete(id: number) {
+    try {
+      await removeTask(id)
+      addToast('Task deleted', 'info')
+    } catch (e) {
+      addToast((e as Error).message, 'error')
+    }
   }
 
   return (
@@ -61,9 +83,6 @@ export default function TasksPage() {
       <div style={{ marginBottom: 'var(--space-5)' }}>
         <FilterBar filters={filters} onChange={setFilters} />
       </div>
-
-      {/* Error */}
-      {error && <div className="error-banner" style={{ marginBottom: 'var(--space-4)' }}>{error}</div>}
 
       {/* Content */}
       {loading ? (
@@ -87,7 +106,7 @@ export default function TasksPage() {
               key={task.id}
               task={task}
               onEdit={openEdit}
-              onDelete={removeTask}
+              onDelete={handleDelete}
               onStatusChange={handleStatusChange}
             />
           ))}
