@@ -3,8 +3,8 @@ import { useTaskCount } from '../../context/TaskCountContext'
 
 const DashboardIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-    <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+    <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
   </svg>
 )
 
@@ -23,36 +23,68 @@ const PreferencesIcon = () => (
   </svg>
 )
 
+const NAV_ITEMS = [
+  { to: '/',            end: true,  Icon: DashboardIcon,  label: 'Dashboard' },
+  { to: '/tasks',       end: false, Icon: TasksIcon,      label: 'Tasks' },
+  { to: '/preferences', end: false, Icon: PreferencesIcon,label: 'Preferences' },
+]
+
 export default function Sidebar() {
   const { count } = useTaskCount()
 
   return (
     <aside className="sidebar">
+      {/* Logo */}
       <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">F</div>
+        <div className="sidebar-logo-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
         <span className="sidebar-logo-text">Focusly</span>
       </div>
 
+      {/* Nav label */}
+      <div style={{ padding: '0 var(--space-4) var(--space-2)', marginTop: 'var(--space-2)' }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(168,173,196,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          Menu
+        </span>
+      </div>
+
       <nav className="sidebar-nav">
-        <NavLink to="/" end>
-          <DashboardIcon />
-          Dashboard
-        </NavLink>
-        <NavLink to="/tasks">
-          <TasksIcon />
-          Tasks
-          {count > 0 && (
-            <span className="sidebar-badge">{count}</span>
-          )}
-        </NavLink>
-        <NavLink to="/preferences">
-          <PreferencesIcon />
-          Preferences
-        </NavLink>
+        {NAV_ITEMS.map(({ to, end, Icon, label }) => (
+          <NavLink key={to} to={to} end={end}>
+            {({ isActive }) => (
+              <>
+                <div className={isActive ? 'sidebar-icon-wrap sidebar-icon-wrap--active' : 'sidebar-icon-wrap'}>
+                  <Icon />
+                </div>
+                <span style={{ flex: 1 }}>{label}</span>
+                {label === 'Tasks' && count > 0 && (
+                  <span className="sidebar-badge">{count}</span>
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
       </nav>
 
+      {/* Footer */}
       <div className="sidebar-footer">
-        Smart Daily Planner · v0.2
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 28, height: 28,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #5b6af0, #8b5cf6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 700, color: '#fff',
+            flexShrink: 0,
+          }}>F</div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sidebar-text-hover)' }}>Focusly</div>
+            <div style={{ fontSize: 10, color: 'rgba(168,173,196,0.5)' }}>v0.2 · EX2</div>
+          </div>
+        </div>
       </div>
     </aside>
   )
