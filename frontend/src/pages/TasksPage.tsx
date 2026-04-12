@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTasks } from '../hooks/useTasks'
 import { useToast } from '../context/ToastContext'
+import { exportTasksToCSV } from '../utils/exporters'
 import type { TaskCreate, TaskFilters, TaskRead } from '../types'
 import FilterBar from '../components/tasks/FilterBar'
 import TaskCard from '../components/tasks/TaskCard'
@@ -76,7 +77,20 @@ export default function TasksPage() {
           <h1 className="page-title">Tasks</h1>
           <p className="page-subtitle">{tasks.length} task{tasks.length !== 1 ? 's' : ''}</p>
         </div>
-        <Button onClick={openCreate}>+ Add Task</Button>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          {tasks.length > 0 && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                exportTasksToCSV(tasks)
+                addToast(`Exported ${tasks.length} task${tasks.length !== 1 ? 's' : ''} to CSV`, 'success')
+              }}
+            >
+              ↓ Export CSV
+            </Button>
+          )}
+          <Button onClick={openCreate}>+ Add Task</Button>
+        </div>
       </div>
 
       {/* Filter bar */}
