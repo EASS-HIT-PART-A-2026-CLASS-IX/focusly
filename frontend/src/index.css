@@ -243,6 +243,7 @@ input, select, textarea {
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-6);
+  min-height: 56px;
 }
 
 .page-title {

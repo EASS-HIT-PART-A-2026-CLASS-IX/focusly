@@ -78,12 +78,12 @@ export default function TasksPage() {
   return (
     <div>
       {/* Header */}
-      <div className="page-header">
-        <div>
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
           <h1 className="page-title">Tasks</h1>
           <p className="page-subtitle">{tasks.length} task{tasks.length !== 1 ? 's' : ''}</p>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
           {tasks.length > 0 && (
             <Button
               variant="ghost"
@@ -97,6 +97,7 @@ export default function TasksPage() {
           )}
           <Button onClick={openCreate}>+ Add Task</Button>
         </div>
+        <div style={{ flex: 1 }} />
       </div>
 
       {/* Filter bar */}
