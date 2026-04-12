@@ -1,9 +1,10 @@
 # Focusly – Smart Daily Planner for Students
 
-Focusly is a lightweight task management backend for students.
-It helps manage study, work, leisure, and personal tasks while storing user preferences for smarter planning in future exercises.
+Focusly is a smart task management app for students — track study, work, leisure, and personal tasks, manage your schedule preferences, and stay on top of your workload.
 
 **EX1** delivers the FastAPI backend with SQLite persistence, full CRUD for tasks and user preferences, task filtering, and a test suite.
+
+**EX2** adds a React + TypeScript frontend — a modern single-page app with a dark sidebar, dashboard overview, full task management (create, edit, delete, filter), and a preferences profile page.
 
 ---
 
@@ -12,11 +13,14 @@ It helps manage study, work, leisure, and personal tasks while storing user pref
 | Layer | Technology |
 |-------|-----------|
 | Language | Python 3.12 |
-| Framework | FastAPI |
+| Backend framework | FastAPI |
 | ORM | SQLModel |
 | Database | SQLite |
 | Tests | pytest + httpx |
 | Package manager | uv |
+| Frontend | React 18 + TypeScript |
+| Build tool | Vite |
+| Routing | React Router v6 |
 
 ---
 
@@ -24,6 +28,7 @@ It helps manage study, work, leisure, and personal tasks while storing user pref
 
 - Python 3.12+
 - uv (package manager)
+- Node.js 18+ and npm (for the frontend)
 
 ---
 
@@ -34,20 +39,32 @@ It helps manage study, work, leisure, and personal tasks while storing user pref
 #    https://docs.astral.sh/uv/getting-started/installation/
 #    Windows (PowerShell): powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# 2. Create the virtual environment and install all dependencies
+# 2. Install backend dependencies
 uv sync --extra dev
+
+# 3. Install frontend dependencies
+cd frontend && npm install
 ```
 
 ---
 
-## Run the API
+## Run the App
 
+**Backend** (runs on port 8000):
 ```bash
 uv run uvicorn app.main:app --reload
 ```
 
 API available at `http://localhost:8000`
 Interactive docs: `http://localhost:8000/docs`
+
+**Frontend** (runs on port 5173):
+```bash
+cd frontend && npm run dev
+```
+
+Open `http://localhost:5173` in your browser.
+> Both backend and frontend must be running at the same time.
 
 ---
 
@@ -157,15 +174,25 @@ curl -X POST http://localhost:8000/preferences \
 ```
 focusly/
 ├── app/
-│   ├── main.py          # FastAPI app, router registration, lifespan
+│   ├── main.py          # FastAPI app, router registration, lifespan, CORS
 │   ├── db.py            # SQLite engine and session
 │   ├── models.py        # SQLModel database models + enums
 │   ├── schemas.py       # Pydantic request/response schemas with validation
 │   ├── repositories.py  # Database access functions
 │   ├── services.py      # Business logic layer
 │   └── routers/
-│       ├── tasks.py     # /tasks endpoints
+│       ├── tasks.py        # /tasks endpoints
 │       └── preferences.py  # /preferences endpoints
+├── frontend/
+│   ├── src/
+│   │   ├── api/            # API client + endpoint functions
+│   │   ├── components/     # UI components (layout, tasks, dashboard, common)
+│   │   ├── hooks/          # useTasks, usePreferences
+│   │   ├── pages/          # DashboardPage, TasksPage, PreferencesPage
+│   │   ├── types/          # TypeScript interfaces mirroring backend schemas
+│   │   └── utils/          # formatters (date, time, duration)
+│   ├── index.html
+│   └── vite.config.ts      # Proxies /api → http://localhost:8000
 ├── tests/
 │   ├── conftest.py      # Test fixtures (in-memory SQLite, TestClient)
 │   ├── test_tasks.py    # Task CRUD + filtering tests
