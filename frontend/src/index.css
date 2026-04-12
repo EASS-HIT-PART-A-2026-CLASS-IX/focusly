@@ -226,7 +226,7 @@ input, select, textarea {
 
 .page-content {
   padding: var(--space-8);
-  max-width: 1100px;
+  max-width: 1280px;
 }
 
 .page-header {
@@ -263,6 +263,113 @@ input, select, textarea {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
+
+/* ── Hero Banner ─────────────────────────────────────────────────────────────── */
+.hero-banner {
+  background: linear-gradient(135deg, #5b6af0 0%, #8b5cf6 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(91, 106, 240, 0.35);
+  animation: fade-up 300ms ease both;
+}
+
+.hero-deco-1 {
+  position: absolute;
+  top: -50px; right: 160px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  pointer-events: none;
+}
+
+.hero-deco-2 {
+  position: absolute;
+  bottom: -70px; right: -20px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+
+.hero-date    { color: rgba(255,255,255,0.7); font-size: var(--text-sm); margin-bottom: 6px; }
+.hero-title   { color: #fff; font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+.hero-subtitle{ color: rgba(255,255,255,0.75); font-size: var(--text-base); }
+
+.hero-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+/* ── Stat Cards ─────────────────────────────────────────────────────────────── */
+.stat-card {
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+}
+
+.stat-deco-1 {
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  pointer-events: none;
+}
+
+.stat-deco-2 {
+  position: absolute;
+  bottom: -30px; right: 20px;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+
+/* ── Recent task rows ───────────────────────────────────────────────────────── */
+.recent-task-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  animation: fade-up 240ms ease both;
+}
+
+.recent-task-row:hover {
+  background: var(--brand-100);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Stagger animations ─────────────────────────────────────────────────────── */
+.stagger-1 { animation: fade-up 280ms ease 60ms both; }
+.stagger-2 { animation: fade-up 280ms ease 120ms both; }
+.stagger-3 { animation: fade-up 280ms ease 180ms both; }
+.stagger-4 { animation: fade-up 280ms ease 240ms both; }
 
 /* ── Forms ──────────────────────────────────────────────────────────────────── */
 .form-group {
