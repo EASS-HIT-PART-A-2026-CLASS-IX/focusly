@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import PageShell from './components/layout/PageShell'
+import TasksPage from './pages/TasksPage'
 
 function Placeholder({ title }: { title: string }) {
   return (
@@ -17,7 +18,7 @@ export default function App() {
     <PageShell>
       <Routes>
         <Route path="/"            element={<Placeholder title="Dashboard" />} />
-        <Route path="/tasks"       element={<Placeholder title="Tasks" />} />
+        <Route path="/tasks"       element={<TasksPage />} />
         <Route path="/preferences" element={<Placeholder title="Preferences" />} />
       </Routes>
     </PageShell>
