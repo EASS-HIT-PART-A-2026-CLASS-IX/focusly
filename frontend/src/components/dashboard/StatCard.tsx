@@ -1,56 +1,100 @@
 interface Props {
   label: string
   value: number | string
-  icon: string
   accent: string
+  icon: 'tasks' | 'progress' | 'completed' | 'hours'
 }
 
-export default function StatCard({ label, value, icon, accent }: Props) {
-  return (
-    <div style={{
-      background: '#ffffff',
-      border: '1px solid #e4ddd0',
-      borderRadius: 12,
-      padding: '20px 24px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-      boxShadow: '0 1px 4px rgba(60,70,40,0.07)',
-      transition: 'box-shadow 200ms ease, transform 200ms ease',
-      position: 'relative',
-      overflow: 'hidden',
-    }}
-    onMouseEnter={e => {
-      (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.09)'
-      ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
-    }}
-    onMouseLeave={e => {
-      (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)'
-      ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'
-    }}
-    >
-      {/* Top accent line */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accent, borderRadius: '12px 12px 0 0' }} />
+const ICONS = {
+  tasks: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="9" y1="9" x2="15" y2="9" />
+      <line x1="9" y1="12" x2="15" y2="12" />
+      <line x1="9" y1="15" x2="13" y2="15" />
+    </svg>
+  ),
+  progress: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 7 12 12 15 15" />
+    </svg>
+  ),
+  completed: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  ),
+  hours: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 7 12 12 16 14" />
+    </svg>
+  ),
+}
 
-      {/* Icon */}
+export default function StatCard({ label, value, accent, icon }: Props) {
+  return (
+    <div
+      className="stat-card-v2"
+      style={{ borderLeft: `3px solid ${accent}` }}
+    >
+      {/* Icon + label row */}
       <div style={{
-        width: 36, height: 36,
-        borderRadius: 8,
-        background: `${accent}14`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 17,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 'var(--space-4)',
       }}>
-        {icon}
+        <span style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: '#7a8570',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}>
+          {label}
+        </span>
+        <div style={{
+          width: 34, height: 34,
+          borderRadius: 8,
+          background: `${accent}18`,
+          color: accent,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          {ICONS[icon]}
+        </div>
       </div>
 
       {/* Value */}
-      <div>
-        <div style={{ fontSize: 28, fontWeight: 800, color: '#2c3320', lineHeight: 1, letterSpacing: '-0.5px' }}>
-          {value}
-        </div>
-        <div style={{ fontSize: 12, color: '#7a8070', marginTop: 5, fontWeight: 500 }}>
-          {label}
-        </div>
+      <div style={{
+        fontSize: 36,
+        fontWeight: 800,
+        color: '#2c3320',
+        lineHeight: 1,
+        letterSpacing: '-1px',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        {value}
+      </div>
+
+      {/* Bottom rule in accent color */}
+      <div style={{
+        marginTop: 'var(--space-4)',
+        height: 2,
+        borderRadius: 2,
+        background: `${accent}22`,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          height: '100%',
+          width: '60%',
+          background: accent,
+          borderRadius: 2,
+          opacity: 0.5,
+        }} />
       </div>
     </div>
   )

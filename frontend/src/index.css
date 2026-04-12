@@ -273,6 +273,21 @@ input, select, textarea {
   transform: translateY(-2px);
 }
 
+/* ── Stat Card v2 ───────────────────────────────────────────────────────────── */
+.stat-card-v2 {
+  background: #fff;
+  border: 1px solid #e4ddd0;
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-5);
+  box-shadow: 0 1px 4px rgba(60,70,40,0.06);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.stat-card-v2:hover {
+  box-shadow: 0 6px 20px rgba(60,70,40,0.1);
+  transform: translateY(-2px);
+}
+
 /* ── Task Card ──────────────────────────────────────────────────────────────── */
 .task-card {
   background: var(--surface);

@@ -121,16 +121,16 @@ export default function DashboardPage() {
             marginBottom: 'var(--space-6)',
           }}>
             <div className="stagger-1">
-              <StatCard label="Total Tasks"     value={total}          icon="📋" accent="#546B41" />
+              <StatCard label="Total Tasks"     value={total}          icon="tasks"     accent="#546B41" />
             </div>
             <div className="stagger-2">
-              <StatCard label="In Progress"     value={inProgress}     icon="⚡" accent="#99AD7A" />
+              <StatCard label="In Progress"     value={inProgress}     icon="progress"  accent="#99AD7A" />
             </div>
             <div className="stagger-3">
-              <StatCard label="Completed"       value={done}           icon="✅" accent="#3d5130" />
+              <StatCard label="Completed"       value={done}           icon="completed" accent="#3d5130" />
             </div>
             <div className="stagger-4">
-              <StatCard label="Hours Remaining" value={estimatedHours} icon="⏱" accent="#DCCCAC" />
+              <StatCard label="Hours Remaining" value={estimatedHours} icon="hours"     accent="#b5a080" />
             </div>
           </div>
 
