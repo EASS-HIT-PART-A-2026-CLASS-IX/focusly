@@ -91,24 +91,24 @@ export default function TaskCalendar({ tasks }: Props) {
               fontSize: 14,
               transition: 'background var(--transition-fast)',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--brand-100)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface-raised)')}
+            onMouseEnter={e => (e.currentTarget.style.background = '#eef3e8')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#faf7f2')}
           >‹</button>
           <button
             onClick={nextMonth}
             style={{
               width: 30, height: 30,
-              border: '1px solid var(--surface-border)',
+              border: '1px solid #e4ddd0',
               borderRadius: 'var(--radius-sm)',
-              background: 'var(--surface-raised)',
+              background: '#faf7f2',
               cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-secondary)',
               fontSize: 14,
               transition: 'background var(--transition-fast)',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--brand-100)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface-raised)')}
+            onMouseEnter={e => (e.currentTarget.style.background = '#eef3e8')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#faf7f2')}
           >›</button>
         </div>
       </div>
@@ -151,15 +151,15 @@ export default function TaskCalendar({ tasks }: Props) {
                 padding: '6px 4px',
                 textAlign: 'center',
                 cursor: hasTasks ? 'pointer' : 'default',
-                background: isToday ? 'var(--brand-500)' : hasTasks ? 'var(--brand-100)' : 'transparent',
+                background: isToday ? '#546B41' : hasTasks ? '#eef3e8' : 'transparent',
                 transition: 'background var(--transition-fast)',
                 minHeight: 42,
               }}
               onMouseEnter={e => {
-                if (!isToday) e.currentTarget.style.background = hasTasks ? 'var(--brand-100)' : 'var(--surface-raised)'
+                if (!isToday) e.currentTarget.style.background = hasTasks ? '#eef3e8' : '#faf7f2'
               }}
               onMouseLeave={e => {
-                if (!isToday) e.currentTarget.style.background = hasTasks ? 'var(--brand-100)' : 'transparent'
+                if (!isToday) e.currentTarget.style.background = hasTasks ? '#eef3e8' : 'transparent'
               }}
             >
               <span style={{
@@ -237,7 +237,7 @@ export default function TaskCalendar({ tasks }: Props) {
                   <div style={{
                     minWidth: 32,
                     textAlign: 'center',
-                    background: 'var(--brand-500)',
+                    background: '#546B41',
                     color: '#fff',
                     borderRadius: 'var(--radius-sm)',
                     padding: '2px 4px',

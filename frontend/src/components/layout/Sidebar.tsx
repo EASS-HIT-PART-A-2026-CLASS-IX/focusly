@@ -75,11 +75,14 @@ export default function Sidebar() {
           <div style={{
             width: 28, height: 28,
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #5b6af0, #8b5cf6)',
+            background: '#99AD7A',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 700, color: '#fff',
             flexShrink: 0,
-          }}>F</div>
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sidebar-text-hover)' }}>Focusly</div>
             <div style={{ fontSize: 10, color: 'rgba(168,173,196,0.5)' }}>v0.2 · EX2</div>

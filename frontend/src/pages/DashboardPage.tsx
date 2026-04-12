@@ -121,16 +121,16 @@ export default function DashboardPage() {
             marginBottom: 'var(--space-6)',
           }}>
             <div className="stagger-1">
-              <StatCard label="Total Tasks"     value={total}          icon="📋" gradient="linear-gradient(135deg, #5b6af0, #4a59e0)" />
+              <StatCard label="Total Tasks"     value={total}          icon="📋" accent="#546B41" />
             </div>
             <div className="stagger-2">
-              <StatCard label="In Progress"     value={inProgress}     icon="⚡" gradient="linear-gradient(135deg, #f59e0b, #d97706)" />
+              <StatCard label="In Progress"     value={inProgress}     icon="⚡" accent="#99AD7A" />
             </div>
             <div className="stagger-3">
-              <StatCard label="Completed"       value={done}           icon="✅" gradient="linear-gradient(135deg, #10b981, #059669)" />
+              <StatCard label="Completed"       value={done}           icon="✅" accent="#3d5130" />
             </div>
             <div className="stagger-4">
-              <StatCard label="Hours Remaining" value={estimatedHours} icon="⏱" gradient="linear-gradient(135deg, #8b5cf6, #7c3aed)" />
+              <StatCard label="Hours Remaining" value={estimatedHours} icon="⏱" accent="#DCCCAC" />
             </div>
           </div>
 

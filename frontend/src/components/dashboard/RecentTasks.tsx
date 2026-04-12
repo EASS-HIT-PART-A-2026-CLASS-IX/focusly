@@ -37,7 +37,7 @@ export default function RecentTasks({ tasks }: Props) {
       }}>
         No tasks yet.{' '}
         <span
-          style={{ color: 'var(--brand-500)', cursor: 'pointer', fontWeight: 600 }}
+          style={{ color: '#546B41', cursor: 'pointer', fontWeight: 600 }}
           onClick={() => navigate('/tasks')}
         >
           Add your first task →
@@ -106,7 +106,7 @@ export default function RecentTasks({ tasks }: Props) {
       <div
         style={{
           fontSize: 'var(--text-sm)',
-          color: 'var(--brand-500)',
+          color: '#546B41',
           cursor: 'pointer',
           padding: 'var(--space-2) 0',
           textAlign: 'right',

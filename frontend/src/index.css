@@ -1,26 +1,32 @@
 /* ── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  /* Brand */
-  --brand-500: #5b6af0;
-  --brand-600: #4a59e0;
-  --brand-100: #eef0fd;
+  /* Palette — Forest & Cream */
+  --green-dark:   #546B41;   /* deep forest green  — primary */
+  --green-mid:    #99AD7A;   /* sage green         — secondary / accents */
+  --tan:          #DCCCAC;   /* warm sand          — borders / subtle */
+  --cream:        #FFF8EC;   /* off-white cream    — backgrounds */
+
+  /* Brand (mapped to palette) */
+  --brand-500: #546B41;
+  --brand-600: #3d5130;
+  --brand-100: #eef3e8;
 
   /* Sidebar */
-  --sidebar-bg: #1a1d2e;
-  --sidebar-text: #a8adc4;
-  --sidebar-text-hover: #d0d3e8;
+  --sidebar-bg: #3a4d2c;
+  --sidebar-text: #b8c9a3;
+  --sidebar-text-hover: #ddeacc;
   --sidebar-active: #ffffff;
   --sidebar-width: 220px;
 
   /* Surfaces */
   --surface: #ffffff;
-  --surface-raised: #f8f9fc;
-  --surface-border: #e8eaf0;
+  --surface-raised: #faf7f2;
+  --surface-border: #e4ddd0;
 
   /* Typography */
-  --text-primary: #1a1d2e;
-  --text-secondary: #6b7280;
-  --text-disabled: #b0b4c4;
+  --text-primary: #2c3320;
+  --text-secondary: #6b7260;
+  --text-disabled: #b5b8a8;
 
   /* Category colors */
   --cat-study-bg:    #dbeafe;  --cat-study-text:    #1d4ed8;  --cat-study-border:    #3b82f6;
@@ -113,13 +119,13 @@ input, select, textarea {
 .sidebar {
   width: var(--sidebar-width);
   min-height: 100vh;
-  background: #13152a;
+  background: var(--green-dark);
   display: flex;
   flex-direction: column;
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 100;
-  border-right: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(0,0,0,0.08);
 }
 
 .sidebar-logo {
@@ -132,13 +138,13 @@ input, select, textarea {
 .sidebar-logo-icon {
   width: 34px;
   height: 34px;
-  background: linear-gradient(135deg, var(--brand-500), #8b5cf6);
+  background: var(--green-mid);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(91,106,240,0.4);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .sidebar-logo-text {
@@ -170,12 +176,12 @@ input, select, textarea {
 }
 
 .sidebar-nav a:hover {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.08);
   color: var(--sidebar-text-hover);
 }
 
 .sidebar-nav a.active {
-  background: rgba(91,106,240,0.18);
+  background: rgba(255,255,255,0.15);
   color: #fff;
 }
 
@@ -198,12 +204,12 @@ input, select, textarea {
 }
 
 .sidebar-icon-wrap--active {
-  background: var(--brand-500);
-  box-shadow: 0 4px 10px rgba(91,106,240,0.4);
+  background: var(--green-mid);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .sidebar-badge {
-  background: var(--brand-500);
+  background: var(--green-mid);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -223,7 +229,7 @@ input, select, textarea {
   margin-left: var(--sidebar-width);
   flex: 1;
   min-height: 100vh;
-  background: #f4f6fb;
+  background: var(--cream);
   overflow-y: auto;
 }
 
@@ -346,7 +352,7 @@ input, select, textarea {
 
 /* ── Hero Banner ─────────────────────────────────────────────────────────────── */
 .hero-banner {
-  background: linear-gradient(135deg, #5b6af0 0%, #8b5cf6 100%);
+  background: var(--green-dark);
   border-radius: var(--radius-lg);
   padding: var(--space-8);
   display: flex;
@@ -356,7 +362,7 @@ input, select, textarea {
   margin-bottom: var(--space-6);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(91, 106, 240, 0.35);
+  box-shadow: 0 4px 20px rgba(50,70,35,0.18);
   animation: fade-up 300ms ease both;
 }
 
