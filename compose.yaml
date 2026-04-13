@@ -6,12 +6,28 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=sqlite:////app/data/focusly.db
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - GEMMA_MODEL=${GEMMA_MODEL:-gemma-3-27b-it}
+      - AI_SERVICE_URL=http://ai_service:8001
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
     volumes:
       - db_data:/app/data
+    depends_on:
+      ai_service:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ai_service:
+    build: ./ai_service
+    ports:
+      - "8001:8001"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMMA_MODEL=${GEMMA_MODEL:-gemma-3-27b-it}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -37,6 +53,9 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:////app/data/focusly.db
+    volumes:
+      - db_data:/app/data
 
   frontend:
     build: ./frontend
