@@ -3,8 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.auth import require_admin
 from app.db import get_session
-from app.models import Category, Priority, Status
+from app.models import Category, Priority, Status, User
 from app.schemas import TaskCreate, TaskRead, TaskUpdate
 from app.services import (
     service_create_task,
@@ -43,5 +44,9 @@ def update_task(task_id: int, data: TaskUpdate, db: Session = Depends(get_sessio
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int, db: Session = Depends(get_session)):
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_session),
+    _: User = Depends(require_admin),
+):
     service_delete_task(db, task_id)

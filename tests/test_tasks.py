@@ -59,10 +59,13 @@ def test_update_task(client: TestClient):
 
 
 def test_delete_task(client: TestClient):
+    client.post("/auth/register", json={"username": "admin", "password": "admin123", "role": "admin"})
+    token = client.post("/auth/token", data={"username": "admin", "password": "admin123"}).json()["access_token"]
+
     created = client.post("/tasks", json=TASK_PAYLOAD).json()
     task_id = created["id"]
 
-    response = client.delete(f"/tasks/{task_id}")
+    response = client.delete(f"/tasks/{task_id}", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 204
 
     response = client.get(f"/tasks/{task_id}")

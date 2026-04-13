@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
+import app.models  # noqa: F401 — ensures all tables are registered in metadata
 from app.db import get_session
 from app.main import app
 

@@ -36,6 +36,11 @@ class PeakFocusTime(str, Enum):
     evening = "evening"
 
 
+class Role(str, Enum):
+    admin = "admin"
+    user = "user"
+
+
 class Task(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str = Field(min_length=1, max_length=200)
@@ -48,6 +53,13 @@ class Task(SQLModel, table=True):
     energy_required: EnergyLevel
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class User(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(unique=True, index=True, min_length=3, max_length=50)
+    hashed_password: str
+    role: Role = Field(default=Role.user)
 
 
 class UserPreferences(SQLModel, table=True):
