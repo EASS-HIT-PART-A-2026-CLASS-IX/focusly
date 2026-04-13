@@ -213,8 +213,10 @@ This project was developed with assistance from Claude (Anthropic).
 - Bouncing ideas on project structure and design decisions
 - Getting feedback on validation rules and edge cases
 - Clarifying FastAPI and SQLModel patterns during development
+- Designing the UI layout (sidebar, dashboard, task cards, filter bar, preferences form)
 
 **How outputs were verified:**
 - All code was reviewed and understood before being included
 - Tests were run locally with `uv run pytest -v` to confirm everything passes
 - Endpoints were manually tested via the Swagger UI at `/docs`
+- Frontend unit tests run with `npm run test` (21 tests passing)
