@@ -11,6 +11,7 @@ RUN uv sync --frozen --no-dev
 
 # Copy application code
 COPY app/ ./app/
+COPY scripts/ ./scripts/
 
 # Ensure the data directory exists for SQLite
 RUN mkdir -p /app/data

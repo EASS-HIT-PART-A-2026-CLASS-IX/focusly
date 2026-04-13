@@ -6,6 +6,8 @@ Focusly is a smart task management app for students — track study, work, leisu
 
 **EX2** adds a React + TypeScript frontend — a modern single-page app with a dark sidebar, dashboard overview, full task management (create, edit, delete, filter), and a preferences profile page.
 
+**EX3** integrates everything into a local multi-service stack: Docker Compose orchestrates five services (API, AI microservice, Redis, background worker, frontend), adds JWT-based authentication with bcrypt passwords, an async overdue-task worker with Redis idempotency, and an AI-powered "Today's Focus" feature powered by Google Gemma.
+
 ---
 
 ## Tech Stack
@@ -21,6 +23,10 @@ Focusly is a smart task management app for students — track study, work, leisu
 | Frontend | React 18 + TypeScript |
 | Build tool | Vite |
 | Routing | React Router v6 |
+| Containerisation | Docker + Docker Compose |
+| Auth | JWT (python-jose) + bcrypt (passlib) |
+| AI | Google Gemma via google-genai SDK |
+| Async worker | anyio + Redis |
 
 ---
 
@@ -214,9 +220,11 @@ This project was developed with assistance from Claude (Anthropic).
 - Getting feedback on validation rules and edge cases
 - Clarifying FastAPI and SQLModel patterns during development
 - Designing the UI layout (sidebar, dashboard, task cards, filter bar, preferences form)
+- Architecting the EX3 multi-service stack (Docker Compose, async worker, JWT auth, AI microservice)
 
 **How outputs were verified:**
 - All code was reviewed and understood before being included
 - Tests were run locally with `uv run pytest -v` to confirm everything passes
 - Endpoints were manually tested via the Swagger UI at `/docs`
 - Frontend unit tests run with `npm run test` (21 tests passing)
+- All backend tests run with `uv run pytest -v` (39 tests passing)

@@ -6,15 +6,28 @@
 docker compose up --build
 ```
 
-This starts four services:
-| Service  | URL                        | Description              |
-|----------|----------------------------|--------------------------|
-| api      | http://localhost:8000      | FastAPI backend          |
-| redis    | localhost:6379             | Redis (worker store)     |
-| worker   | —                          | Background task worker   |
-| frontend | http://localhost           | React app (nginx)        |
+This starts five services:
+
+| Service    | URL                        | Description                        |
+|------------|----------------------------|------------------------------------|
+| api        | http://localhost:8000      | FastAPI backend                    |
+| ai_service | http://localhost:8001      | Gemma AI microservice              |
+| redis      | localhost:6379             | Redis (worker idempotency store)   |
+| worker     | —                          | Background overdue-task detector   |
+| frontend   | http://localhost           | React app (nginx)                  |
 
 > First run takes longer — Docker builds all images. Subsequent runs use the cache.
+
+---
+
+## Prerequisites
+
+Create a `.env` file in the project root before starting:
+
+```bash
+cp .env.example .env
+# then edit .env and set your GOOGLE_API_KEY
+```
 
 ---
 
@@ -23,6 +36,12 @@ This starts four services:
 **API:**
 ```bash
 curl http://localhost:8000/health
+# Expected: {"status":"ok"}
+```
+
+**AI service:**
+```bash
+curl http://localhost:8001/health
 # Expected: {"status":"ok"}
 ```
 
@@ -49,6 +68,16 @@ docker compose logs worker
 
 ---
 
+## Run the demo script
+
+```bash
+bash scripts/demo.sh
+```
+
+Walks through: health checks → seed → create task → AI suggestions → JWT auth → worker logs → frontend.
+
+---
+
 ## Seed the database
 
 ```bash
@@ -57,7 +86,7 @@ docker compose exec api uv run python scripts/seed.py
 
 ---
 
-## Run backend tests against the running stack
+## Run backend tests
 
 ```bash
 uv run pytest -v
@@ -82,5 +111,6 @@ docker compose down -v
 
 ```bash
 docker compose up --build api
+docker compose up --build ai_service
 docker compose up --build frontend
 ```

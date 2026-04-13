@@ -2,16 +2,27 @@
 
 ## Architecture Overview
 
-Focusly EX3 is a local multi-service stack with four cooperating processes:
+Focusly EX3 is a local multi-service stack with five cooperating processes:
 
-| Service  | Technology          | Role                                      |
-|----------|---------------------|-------------------------------------------|
-| api      | FastAPI + SQLModel  | REST backend, business logic, auth        |
-| redis    | Redis 7             | Worker idempotency store                  |
-| worker   | Python + anyio      | Background overdue-task detection         |
-| frontend | React + nginx       | Single-page app served as static files    |
+| Service    | Technology          | Role                                        |
+|------------|---------------------|---------------------------------------------|
+| api        | FastAPI + SQLModel  | REST backend, business logic, auth          |
+| ai_service | FastAPI + Gemma     | Dedicated LLM microservice (task suggestions) |
+| redis      | Redis 7             | Worker idempotency store                    |
+| worker     | Python + anyio      | Background overdue-task detection           |
+| frontend   | React + nginx       | Single-page app served as static files      |
 
 All services are orchestrated via `compose.yaml` and run locally with `docker compose up --build`.
+
+### Request flow for AI suggestions
+```
+browser → frontend (nginx) → api (GET /suggestions)
+                                  → ai_service (POST /suggest)
+                                        → Google Gemma API
+```
+
+The main API never calls Gemma directly — it delegates to `ai_service`,
+which is the only service that holds the `GOOGLE_API_KEY`.
 
 ---
 
