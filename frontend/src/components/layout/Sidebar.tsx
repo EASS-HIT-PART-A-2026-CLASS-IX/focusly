@@ -85,7 +85,7 @@ export default function Sidebar() {
           </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sidebar-text-hover)' }}>Focusly</div>
-            <div style={{ fontSize: 10, color: 'rgba(168,173,196,0.5)' }}>v0.2 · EX2</div>
+            <div style={{ fontSize: 10, color: 'rgba(168,173,196,0.5)' }}>v0.2</div>
           </div>
         </div>
       </div>
