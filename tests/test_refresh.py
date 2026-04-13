@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from scripts.refresh import IDEMPOTENCY_TTL, process_task
+from scripts.refresh import IDEMPOTENCY_TTL, process_task_with_retry as process_task
 from app.models import Priority, Category, EnergyLevel, Status, Task
 
 
@@ -68,3 +68,21 @@ async def test_refresh_no_overdue_tasks():
         result = await refresh()
 
     assert result == 0
+
+
+@pytest.mark.anyio
+async def test_process_task_retries_on_failure():
+    """A transient Redis error should be retried; succeeds on second attempt."""
+    task = make_task(id=3)
+    redis = AsyncMock()
+    # First get() raises, second succeeds
+    redis.get.side_effect = [Exception("Redis timeout"), None]
+    limiter = MagicMock()
+    limiter.__aenter__ = AsyncMock(return_value=None)
+    limiter.__aexit__ = AsyncMock(return_value=False)
+
+    with patch("scripts.refresh.anyio.sleep", new=AsyncMock()):
+        await process_task(task, redis, limiter)
+
+    assert redis.get.call_count == 2
+    redis.set.assert_called_once_with("processed:3", "1", ex=IDEMPOTENCY_TTL)
