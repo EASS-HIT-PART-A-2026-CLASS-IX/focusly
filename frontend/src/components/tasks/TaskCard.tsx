@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { TaskRead, Status } from '../../types'
 import ConfirmDialog from '../common/ConfirmDialog'
 import { formatMinutes, formatDate } from '../../utils/formatters'
+import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
 
 const CATEGORY_ACCENT: Record<string, string> = {
   study:    '#546B41',
@@ -64,6 +67,18 @@ interface Props {
 
 export default function TaskCard({ task, onEdit, onDelete, onStatusChange }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const { token } = useAuth()
+  const { addToast } = useToast()
+  const navigate = useNavigate()
+
+  const handleDeleteClick = () => {
+    if (!token) {
+      addToast('Sign in as admin to delete tasks', 'error')
+      navigate('/login')
+      return
+    }
+    setConfirmOpen(true)
+  }
 
   const accent   = CATEGORY_ACCENT[task.category]  ?? '#5b6af0'
   const priority = PRIORITY_CONFIG[task.priority]  ?? PRIORITY_CONFIG.medium
@@ -178,7 +193,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }: Pro
           <button className="icon-btn" onClick={() => onEdit(task)}>
             <EditIcon /> Edit
           </button>
-          <button className="icon-btn icon-btn--danger" onClick={() => setConfirmOpen(true)}>
+          <button className="icon-btn icon-btn--danger" onClick={handleDeleteClick}>
             <TrashIcon />
           </button>
         </div>

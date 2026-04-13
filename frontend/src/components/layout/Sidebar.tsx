@@ -1,5 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useTaskCount } from '../../context/TaskCountContext'
+import { useAuth } from '../../context/AuthContext'
 
 const DashboardIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -29,8 +30,18 @@ const NAV_ITEMS = [
   { to: '/preferences', end: false, Icon: PreferencesIcon,label: 'Preferences' },
 ]
 
+const LoginIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+    <polyline points="10 17 15 12 10 7" />
+    <line x1="15" y1="12" x2="3" y2="12" />
+  </svg>
+)
+
 export default function Sidebar() {
   const { count } = useTaskCount()
+  const { username, logout } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <aside className="sidebar">
@@ -71,23 +82,53 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="sidebar-footer">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 28, height: 28,
-            borderRadius: '50%',
-            background: '#99AD7A',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+        {username ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 28, height: 28,
+              borderRadius: '50%',
+              background: '#546B41',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+              fontSize: 12, fontWeight: 700, color: 'white',
+            }}>
+              {username[0].toUpperCase()}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sidebar-text-hover)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{username}</div>
+              <div style={{ fontSize: 10, color: 'rgba(168,173,196,0.5)' }}>Admin</div>
+            </div>
+            <button
+              onClick={() => { logout(); navigate('/') }}
+              title="Sign out"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'rgba(168,173,196,0.6)', padding: 4,
+                display: 'flex', alignItems: 'center',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sidebar-text-hover)' }}>Focusly</div>
-            <div style={{ fontSize: 10, color: 'rgba(168,173,196,0.5)' }}>v0.2</div>
-          </div>
-        </div>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'none', border: '1px solid rgba(168,173,196,0.2)',
+              borderRadius: 8, cursor: 'pointer',
+              padding: '8px 12px', width: '100%',
+              color: 'var(--sidebar-text)', fontSize: 13, fontWeight: 600,
+            }}
+          >
+            <div style={{ width: 16, height: 16, flexShrink: 0 }}><LoginIcon /></div>
+            Sign in
+          </button>
+        )}
       </div>
     </aside>
   )
