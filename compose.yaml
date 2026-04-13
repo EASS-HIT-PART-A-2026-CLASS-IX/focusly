@@ -6,6 +6,8 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=sqlite:////app/data/focusly.db
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMMA_MODEL=${GEMMA_MODEL:-gemma-3-27b-it}
     volumes:
       - db_data:/app/data
     healthcheck:

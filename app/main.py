@@ -1,10 +1,13 @@
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import create_db_and_tables
-from app.routers import auth, preferences, tasks
+from app.routers import auth, preferences, suggestions, tasks
 
 
 @asynccontextmanager
@@ -30,6 +33,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(preferences.router)
+app.include_router(suggestions.router)
 
 
 @app.get("/health")

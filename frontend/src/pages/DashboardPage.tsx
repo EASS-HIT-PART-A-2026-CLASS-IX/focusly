@@ -5,6 +5,7 @@ import { useTaskCount } from '../context/TaskCountContext'
 import StatCard from '../components/dashboard/StatCard'
 import RecentTasks from '../components/dashboard/RecentTasks'
 import TaskCalendar from '../components/dashboard/TaskCalendar'
+import FocusCard from '../components/dashboard/FocusCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 
 function getGreeting(): string {
@@ -139,9 +140,10 @@ export default function DashboardPage() {
           <RecentTasks tasks={tasks} />
         </div>
 
-        {/* Right column — calendar */}
+        {/* Right column — calendar + AI focus */}
         <div className="stagger-2">
           <TaskCalendar tasks={tasks} />
+          <FocusCard />
         </div>
       </div>
     </div>
