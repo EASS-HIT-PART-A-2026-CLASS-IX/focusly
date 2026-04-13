@@ -35,7 +35,7 @@ function HeroBanner({ name, done, total }: { name: string; done: number; total: 
 
       <div>
         <p className="hero-date">{today}</p>
-        <h1 className="hero-title">{getGreeting()}, {name || 'there'} 👋</h1>
+        <h1 className="hero-title">{getGreeting()}, {name || 'there'}</h1>
         <p className="hero-subtitle">{subtitle}</p>
       </div>
 
