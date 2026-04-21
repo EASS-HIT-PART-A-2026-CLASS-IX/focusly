@@ -24,29 +24,43 @@ def list_tasks(
     category: Optional[Category] = None,
     priority: Optional[Priority] = None,
     db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    return service_list_tasks(db, status=status, category=category, priority=priority)
+    return service_list_tasks(db, user_id=current_user.id, status=status, category=category, priority=priority)
 
 
 @router.get("/{task_id}", response_model=TaskRead)
-def get_task(task_id: int, db: Session = Depends(get_session)):
-    return service_get_task(db, task_id)
+def get_task(
+    task_id: int,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    return service_get_task(db, task_id, user_id=current_user.id)
 
 
 @router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
-def create_task(data: TaskCreate, db: Session = Depends(get_session)):
-    return service_create_task(db, data)
+def create_task(
+    data: TaskCreate,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    return service_create_task(db, data, user_id=current_user.id)
 
 
 @router.put("/{task_id}", response_model=TaskRead)
-def update_task(task_id: int, data: TaskUpdate, db: Session = Depends(get_session)):
-    return service_update_task(db, task_id, data)
+def update_task(
+    task_id: int,
+    data: TaskUpdate,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    return service_update_task(db, task_id, data, user_id=current_user.id)
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
     task_id: int,
     db: Session = Depends(get_session),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    service_delete_task(db, task_id)
+    service_delete_task(db, task_id, user_id=current_user.id)

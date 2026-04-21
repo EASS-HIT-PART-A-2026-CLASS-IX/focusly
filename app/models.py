@@ -43,6 +43,7 @@ class Role(str, Enum):
 
 class Task(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
     title: str = Field(min_length=1, max_length=200)
     description: Optional[str] = None
     category: Category

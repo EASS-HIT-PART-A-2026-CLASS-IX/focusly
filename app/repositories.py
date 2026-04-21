@@ -14,11 +14,12 @@ def get_task(db: Session, task_id: int) -> Optional[Task]:
 
 def list_tasks(
     db: Session,
+    user_id: int,
     status: Optional[Status] = None,
     category: Optional[Category] = None,
     priority: Optional[Priority] = None,
 ) -> list[Task]:
-    query = select(Task)
+    query = select(Task).where(Task.user_id == user_id)
     if status is not None:
         query = query.where(Task.status == status)
     if category is not None:
@@ -28,8 +29,9 @@ def list_tasks(
     return list(db.exec(query).all())
 
 
-def create_task(db: Session, data: TaskCreate) -> Task:
+def create_task(db: Session, data: TaskCreate, user_id: int) -> Task:
     task = Task.model_validate(data)
+    task.user_id = user_id
     db.add(task)
     db.commit()
     db.refresh(task)

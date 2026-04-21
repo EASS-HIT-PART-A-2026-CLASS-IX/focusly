@@ -24,32 +24,33 @@ from app.schemas import PreferencesCreate, PreferencesUpdate, TaskCreate, TaskUp
 
 def service_list_tasks(
     db: Session,
+    user_id: int,
     status: Optional[Status] = None,
     category: Optional[Category] = None,
     priority: Optional[Priority] = None,
 ) -> list[Task]:
-    return list_tasks(db, status=status, category=category, priority=priority)
+    return list_tasks(db, user_id=user_id, status=status, category=category, priority=priority)
 
 
-def service_get_task(db: Session, task_id: int) -> Task:
+def service_get_task(db: Session, task_id: int, user_id: int) -> Task:
     task = get_task(db, task_id)
-    if task is None:
+    if task is None or task.user_id != user_id:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     return task
 
 
-def service_create_task(db: Session, data: TaskCreate) -> Task:
-    return create_task(db, data)
+def service_create_task(db: Session, data: TaskCreate, user_id: int) -> Task:
+    return create_task(db, data, user_id=user_id)
 
 
-def service_update_task(db: Session, task_id: int, data: TaskUpdate) -> Task:
-    task = service_get_task(db, task_id)
+def service_update_task(db: Session, task_id: int, data: TaskUpdate, user_id: int) -> Task:
+    task = service_get_task(db, task_id, user_id=user_id)
     task.updated_at = datetime.now(UTC)
     return update_task(db, task, data)
 
 
-def service_delete_task(db: Session, task_id: int) -> None:
-    task = service_get_task(db, task_id)
+def service_delete_task(db: Session, task_id: int, user_id: int) -> None:
+    task = service_get_task(db, task_id, user_id=user_id)
     delete_task(db, task)
 
 
