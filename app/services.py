@@ -56,26 +56,26 @@ def service_delete_task(db: Session, task_id: int, user_id: int) -> None:
 
 # ── UserPreferences service ───────────────────────────────────────────────────
 
-def service_list_preferences(db: Session) -> list[UserPreferences]:
-    return list_preferences(db)
+def service_list_preferences(db: Session, user_id: int) -> list[UserPreferences]:
+    return list_preferences(db, user_id=user_id)
 
 
-def service_get_preferences(db: Session, pref_id: int) -> UserPreferences:
+def service_get_preferences(db: Session, pref_id: int, user_id: int) -> UserPreferences:
     prefs = get_preferences(db, pref_id)
-    if prefs is None:
+    if prefs is None or prefs.user_id != user_id:
         raise HTTPException(status_code=404, detail=f"Preferences {pref_id} not found")
     return prefs
 
 
-def service_create_preferences(db: Session, data: PreferencesCreate) -> UserPreferences:
-    return create_preferences(db, data)
+def service_create_preferences(db: Session, data: PreferencesCreate, user_id: int) -> UserPreferences:
+    return create_preferences(db, data, user_id=user_id)
 
 
-def service_update_preferences(db: Session, pref_id: int, data: PreferencesUpdate) -> UserPreferences:
-    prefs = service_get_preferences(db, pref_id)
+def service_update_preferences(db: Session, pref_id: int, data: PreferencesUpdate, user_id: int) -> UserPreferences:
+    prefs = service_get_preferences(db, pref_id, user_id=user_id)
     return update_preferences(db, prefs, data)
 
 
-def service_delete_preferences(db: Session, pref_id: int) -> None:
-    prefs = service_get_preferences(db, pref_id)
+def service_delete_preferences(db: Session, pref_id: int, user_id: int) -> None:
+    prefs = service_get_preferences(db, pref_id, user_id=user_id)
     delete_preferences(db, prefs)

@@ -65,6 +65,7 @@ class User(SQLModel, table=True):
 
 class UserPreferences(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
     display_name: str = Field(min_length=1, max_length=100)
     age: int = Field(ge=1, le=120)
     work_start_hour: int = Field(ge=0, le=23)

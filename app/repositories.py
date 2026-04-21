@@ -59,12 +59,13 @@ def get_preferences(db: Session, pref_id: int) -> Optional[UserPreferences]:
     return db.get(UserPreferences, pref_id)
 
 
-def list_preferences(db: Session) -> list[UserPreferences]:
-    return list(db.exec(select(UserPreferences)).all())
+def list_preferences(db: Session, user_id: int) -> list[UserPreferences]:
+    return list(db.exec(select(UserPreferences).where(UserPreferences.user_id == user_id)).all())
 
 
-def create_preferences(db: Session, data: PreferencesCreate) -> UserPreferences:
+def create_preferences(db: Session, data: PreferencesCreate, user_id: int) -> UserPreferences:
     prefs = UserPreferences.model_validate(data)
+    prefs.user_id = user_id
     db.add(prefs)
     db.commit()
     db.refresh(prefs)
