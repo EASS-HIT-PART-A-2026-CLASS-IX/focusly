@@ -1,29 +1,52 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { loginApi } from '../api/authApi'
+import { registerApi, loginApi } from '../api/authApi'
 
-export default function LoginPage() {
-  const { login }        = useAuth()
-  const navigate         = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+export default function RegisterPage() {
+  const { login }   = useAuth()
+  const navigate    = useNavigate()
+  const [username, setUsername]   = useState('')
+  const [password, setPassword]   = useState('')
+  const [role, setRole]           = useState<'user' | 'admin'>('user')
+  const [error, setError]         = useState('')
+  const [loading, setLoading]     = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
+      await registerApi(username, password, role)
+      // Auto-login after successful registration
       const { access_token } = await loginApi(username, password)
       login(access_token, username)
       navigate('/')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
     }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '9px 12px',
+    border: '1px solid var(--surface-border)',
+    borderRadius: 'var(--radius-md)',
+    fontSize: 'var(--text-sm)',
+    background: 'var(--surface)',
+    color: 'var(--text-primary)',
+    boxSizing: 'border-box',
+    outline: 'none',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: 'var(--text-sm)',
+    fontWeight: 600,
+    color: 'var(--text-primary)',
+    marginBottom: 6,
   }
 
   return (
@@ -58,58 +81,46 @@ export default function LoginPage() {
         </div>
 
         <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-          Sign in
+          Create account
         </h1>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 24 }}>
-          Welcome back
+          Get started with Focusly
         </p>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
-              Username
-            </label>
+            <label style={labelStyle}>Username</label>
             <input
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
               required
               autoFocus
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                border: '1px solid var(--surface-border)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: 'var(--text-sm)',
-                background: 'var(--surface)',
-                color: 'var(--text-primary)',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
-              Password
-            </label>
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                border: '1px solid var(--surface-border)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: 'var(--text-sm)',
-                background: 'var(--surface)',
-                color: 'var(--text-primary)',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
+              style={inputStyle}
             />
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Role</label>
+            <select
+              value={role}
+              onChange={e => setRole(e.target.value as 'user' | 'admin')}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin (can delete tasks)</option>
+            </select>
           </div>
 
           {error && (
@@ -141,14 +152,14 @@ export default function LoginPage() {
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
         <p style={{ textAlign: 'center', marginTop: 20, fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-          Don't have an account?{' '}
-          <Link to="/register" style={{ color: 'var(--green-dark)', fontWeight: 600, textDecoration: 'none' }}>
-            Sign up
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: 'var(--green-dark)', fontWeight: 600, textDecoration: 'none' }}>
+            Sign in
           </Link>
         </p>
       </div>

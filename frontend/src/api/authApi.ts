@@ -18,3 +18,20 @@ export async function loginApi(username: string, password: string): Promise<Toke
   }
   return res.json()
 }
+
+export async function registerApi(
+  username: string,
+  password: string,
+  role: 'user' | 'admin' = 'user',
+): Promise<{ id: number; username: string; role: string }> {
+  const res = await fetch(`${BASE}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, role }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Registration failed' }))
+    throw new Error(err.detail ?? 'Registration failed')
+  }
+  return res.json()
+}
