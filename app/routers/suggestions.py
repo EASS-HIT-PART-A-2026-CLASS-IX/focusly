@@ -14,8 +14,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
+from app.auth import get_current_user
 from app.db import get_session
-from app.models import Status, Task
+from app.models import Status, Task, User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/suggestions", tags=["suggestions"])
@@ -36,9 +37,12 @@ class SuggestionsResponse(BaseModel):
 
 
 @router.get("", response_model=SuggestionsResponse)
-def get_suggestions(session: Session = Depends(get_session)):
+def get_suggestions(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     tasks = session.exec(
-        select(Task).where(Task.status != Status.done)
+        select(Task).where(Task.status != Status.done, Task.user_id == current_user.id)
     ).all()
 
     if not tasks:

@@ -71,15 +71,19 @@ def build_prompt(tasks: list[TaskInput]) -> str:
         f"deadline: {t.deadline or 'none'}"
         for t in tasks
     )
+    n = min(3, len(tasks))
     return f"""You are an enthusiastic, friendly study coach for students.
-Pick the top 3 tasks from the list below to focus on TODAY.
+Pick up to {n} tasks from the list below to focus on TODAY.
 For each, write a short (1-2 sentences), fun and motivating reason why to tackle it now.
 
 Rules:
+- ONLY use tasks from the list below — never invent or add new tasks
+- Return exactly {n} suggestions, one per task in the list (do not create extras)
 - Be encouraging and energetic, not robotic
 - Keep each reason under 20 words
 - Choose a relevant emoji for each task
 - If estimated_minutes is unknown, make a reasonable estimate
+- task_id must be one of the IDs from the list above
 
 Tasks:
 {task_list}
@@ -103,6 +107,9 @@ def suggest(body: SuggestRequest):
     if not body.tasks:
         return SuggestResponse(suggestions=[])
 
+    valid_ids = {t.id for t in body.tasks}
+    valid_titles = {t.id: t.title for t in body.tasks}
+
     try:
         client   = genai.Client(api_key=GOOGLE_API_KEY)
         response = client.models.generate_content(
@@ -115,9 +122,18 @@ def suggest(body: SuggestRequest):
             if raw.startswith("json"):
                 raw = raw[4:]
         data = json.loads(raw)
-        return SuggestResponse(
-            suggestions=[Suggestion(**s) for s in data["suggestions"]]
-        )
+
+        # Filter out any hallucinated tasks not in the original list
+        suggestions = [
+            Suggestion(**s)
+            for s in data["suggestions"]
+            if s.get("task_id") in valid_ids
+        ]
+        # Ensure titles match the real task titles
+        for s in suggestions:
+            s.title = valid_titles[s.task_id]
+
+        return SuggestResponse(suggestions=suggestions)
     except Exception as e:
         logger.error("Gemma call failed: %s", e)
         raise HTTPException(status_code=502, detail="Gemma request failed")
