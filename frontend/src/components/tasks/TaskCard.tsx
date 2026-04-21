@@ -73,7 +73,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }: Pro
 
   const handleDeleteClick = () => {
     if (!token) {
-      addToast('Sign in as admin to delete tasks', 'error')
+      addToast('Sign in to delete tasks', 'error')
       navigate('/login')
       return
     }

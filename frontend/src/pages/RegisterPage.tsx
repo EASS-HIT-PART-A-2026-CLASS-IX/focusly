@@ -8,7 +8,6 @@ export default function RegisterPage() {
   const navigate    = useNavigate()
   const [username, setUsername]   = useState('')
   const [password, setPassword]   = useState('')
-  const [role, setRole]           = useState<'user' | 'admin'>('user')
   const [error, setError]         = useState('')
   const [loading, setLoading]     = useState(false)
 
@@ -17,7 +16,7 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
     try {
-      await registerApi(username, password, role)
+      await registerApi(username, password)
       // Auto-login after successful registration
       const { access_token } = await loginApi(username, password)
       login(access_token, username)
@@ -100,7 +99,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 24 }}>
             <label style={labelStyle}>Password</label>
             <input
               type="password"
@@ -109,18 +108,6 @@ export default function RegisterPage() {
               required
               style={inputStyle}
             />
-          </div>
-
-          <div style={{ marginBottom: 24 }}>
-            <label style={labelStyle}>Role</label>
-            <select
-              value={role}
-              onChange={e => setRole(e.target.value as 'user' | 'admin')}
-              style={{ ...inputStyle, cursor: 'pointer' }}
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin (can delete tasks)</option>
-            </select>
           </div>
 
           {error && (

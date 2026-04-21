@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
-from app.auth import require_admin
+from app.auth import get_current_user
 from app.db import get_session
 from app.models import Category, Priority, Status, User
 from app.schemas import TaskCreate, TaskRead, TaskUpdate
@@ -47,6 +47,6 @@ def update_task(task_id: int, data: TaskUpdate, db: Session = Depends(get_sessio
 def delete_task(
     task_id: int,
     db: Session = Depends(get_session),
-    _: User = Depends(require_admin),
+    _: User = Depends(get_current_user),
 ):
     service_delete_task(db, task_id)
