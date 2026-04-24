@@ -5,7 +5,6 @@ Mocks the HTTP call to the AI microservice so no real service is needed.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -39,11 +38,11 @@ def mock_httpx_post(url, **kwargs):
     return response
 
 
-def test_suggestions_returns_list(client: TestClient):
-    client.post("/tasks", json=TASK_PAYLOAD)
+def test_suggestions_returns_list(client: TestClient, auth_headers: dict):
+    client.post("/tasks", json=TASK_PAYLOAD, headers=auth_headers)
 
     with patch("app.routers.suggestions.httpx.post", side_effect=mock_httpx_post):
-        response = client.get("/suggestions")
+        response = client.get("/suggestions", headers=auth_headers)
 
     assert response.status_code == 200
     data = response.json()
@@ -53,20 +52,20 @@ def test_suggestions_returns_list(client: TestClient):
     assert data["suggestions"][0]["estimated_minutes"] == 90
 
 
-def test_suggestions_empty_when_no_tasks(client: TestClient):
-    response = client.get("/suggestions")
+def test_suggestions_empty_when_no_tasks(client: TestClient, auth_headers: dict):
+    response = client.get("/suggestions", headers=auth_headers)
 
     assert response.status_code == 200
     assert response.json()["suggestions"] == []
 
 
-def test_suggestions_503_when_ai_service_unreachable(client: TestClient):
+def test_suggestions_503_when_ai_service_unreachable(client: TestClient, auth_headers: dict):
     import httpx as real_httpx
 
-    client.post("/tasks", json=TASK_PAYLOAD)
+    client.post("/tasks", json=TASK_PAYLOAD, headers=auth_headers)
 
     with patch("app.routers.suggestions.httpx.post",
                side_effect=real_httpx.RequestError("connection refused")):
-        response = client.get("/suggestions")
+        response = client.get("/suggestions", headers=auth_headers)
 
     assert response.status_code == 503
