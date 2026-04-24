@@ -13,9 +13,6 @@ RUN uv sync --frozen --no-dev
 COPY app/ ./app/
 COPY scripts/ ./scripts/
 
-# Ensure the data directory exists for SQLite
-RUN mkdir -p /app/data
-
 EXPOSE 8000
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

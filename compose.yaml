@@ -1,16 +1,32 @@
 services:
 
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: focusly
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-focusly}
+      POSTGRES_DB: focusly
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U focusly"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build: .
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite:////app/data/focusly.db
+      - DATABASE_URL=postgresql+psycopg2://focusly:${POSTGRES_PASSWORD:-focusly}@postgres:5432/focusly
       - AI_SERVICE_URL=http://ai_service:8001
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
-    volumes:
-      - db_data:/app/data
     depends_on:
+      postgres:
+        condition: service_healthy
       ai_service:
         condition: service_healthy
     healthcheck:
@@ -53,9 +69,7 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=sqlite:////app/data/focusly.db
-    volumes:
-      - db_data:/app/data
+      - DATABASE_URL=postgresql+psycopg2://focusly:${POSTGRES_PASSWORD:-focusly}@postgres:5432/focusly
 
   frontend:
     build: ./frontend
@@ -66,4 +80,4 @@ services:
         condition: service_healthy
 
 volumes:
-  db_data:
+  pg_data:
