@@ -18,7 +18,6 @@ info()    { echo -e "${YELLOW}→ $1${NC}"; }
 fail()    { echo -e "${RED}✗ $1${NC}"; }
 
 check_curl() {
-  # Returns response body or empty string on failure
   curl -sf --max-time 10 "$1" 2>/dev/null || echo ""
 }
 
@@ -43,29 +42,49 @@ fi
 REDIS_PING=$(docker compose exec -T redis redis-cli ping 2>/dev/null || echo "unreachable")
 ok "Redis: $REDIS_PING"
 
-# ── 2. Seed the database ──────────────────────────────────────────────────────
-section "2. Seed Database"
+# ── 2. Register & Login ───────────────────────────────────────────────────────
+section "2. Register & Login (JWT Auth)"
+
+curl -sf -X POST "$BASE/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo_user","password":"demo123","role":"user"}' > /dev/null 2>&1
+
+TOKEN_RESP=$(curl -sf -X POST "$BASE/auth/token" \
+  -d "username=demo_user&password=demo123" 2>/dev/null || echo "")
+
+if echo "$TOKEN_RESP" | grep -q "access_token"; then
+  TOKEN=$(echo "$TOKEN_RESP" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+  ok "JWT token obtained (HS256, 30min expiry)"
+else
+  fail "Could not obtain JWT token"
+  exit 1
+fi
+
+# ── 3. Seed the database ──────────────────────────────────────────────────────
+section "3. Seed Database"
 if docker compose exec -T api bash -c "cd /app && PYTHONPATH=/app uv run python scripts/seed.py" 2>&1; then
   ok "Database seeded"
 else
   fail "Seed failed"
 fi
 
-# ── 3. List tasks ─────────────────────────────────────────────────────────────
-section "3. Task List (GET /tasks)"
-TASKS=$(check_curl "$BASE/tasks")
+# ── 4. List tasks ─────────────────────────────────────────────────────────────
+section "4. Task List (GET /tasks)"
+TASKS=$(curl -sf --max-time 10 "$BASE/tasks" \
+  -H "Authorization: Bearer $TOKEN" 2>/dev/null || echo "")
 if [ -n "$TASKS" ]; then
   ok "GET /tasks returned data"
   echo "  $TASKS" | head -c 200
   echo "..."
 else
-  fail "No tasks returned"
+  info "No tasks for this user yet (seed tasks belong to no user — create one below)"
 fi
 
-# ── 4. Create a task ─────────────────────────────────────────────────────────
-section "4. Create a Task (POST /tasks)"
+# ── 5. Create a task ─────────────────────────────────────────────────────────
+section "5. Create a Task (POST /tasks)"
 NEW_TASK=$(curl -sf -X POST "$BASE/tasks" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "title": "Demo task - EX3 submission",
     "category": "study",
@@ -75,15 +94,18 @@ NEW_TASK=$(curl -sf -X POST "$BASE/tasks" \
     "estimated_minutes": 30
   }' 2>/dev/null || echo "")
 if echo "$NEW_TASK" | grep -q "Demo task - EX3"; then
-  ok "Task created: $(echo "$NEW_TASK" | grep -o '"title":"[^"]*"')"
+  TASK_ID=$(echo "$NEW_TASK" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
+  ok "Task created: $(echo "$NEW_TASK" | grep -o '"title":"[^"]*"') (id=$TASK_ID)"
 else
   fail "Task creation failed"
+  TASK_ID=1
 fi
 
-# ── 5. AI suggestions ─────────────────────────────────────────────────────────
-section "5. AI Task Suggestions (GET /suggestions → ai_service → Gemma)"
+# ── 6. AI suggestions ─────────────────────────────────────────────────────────
+section "6. AI Task Suggestions (GET /suggestions → ai_service → Gemma)"
 info "Calling Gemma via the AI microservice — this may take a few seconds..."
-SUGGESTIONS=$(curl -sf --max-time 30 "$BASE/suggestions" 2>/dev/null || echo "")
+SUGGESTIONS=$(curl -sf --max-time 30 "$BASE/suggestions" \
+  -H "Authorization: Bearer $TOKEN" 2>/dev/null || echo "")
 if echo "$SUGGESTIONS" | grep -q "suggestions"; then
   ok "Suggestions received from Gemma"
   echo "  $SUGGESTIONS" | head -c 400
@@ -92,37 +114,23 @@ else
   fail "No suggestions returned (check GOOGLE_API_KEY in .env)"
 fi
 
-# ── 6. JWT Auth ───────────────────────────────────────────────────────────────
-section "6. JWT Auth — Register Admin & Protected Delete"
+# ── 7. JWT Protected Delete ───────────────────────────────────────────────────
+section "7. JWT Auth — Protected Delete"
 
-curl -sf -X POST "$BASE/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"demo_admin","password":"admin123","role":"admin"}' > /dev/null 2>&1
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/tasks/$TASK_ID" \
+  -H "Authorization: Bearer $TOKEN" 2>/dev/null)
+ok "DELETE /tasks/$TASK_ID with token → HTTP $STATUS (204 expected)"
 
-TOKEN_RESP=$(curl -sf -X POST "$BASE/auth/token" \
-  -d "username=demo_admin&password=admin123" 2>/dev/null || echo "")
+NO_AUTH=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/tasks/$TASK_ID" 2>/dev/null)
+ok "DELETE /tasks/$TASK_ID without token → HTTP $NO_AUTH (401 expected)"
 
-if echo "$TOKEN_RESP" | grep -q "access_token"; then
-  ok "Admin JWT token obtained (HS256, 30min expiry)"
-  TOKEN=$(echo "$TOKEN_RESP" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
-
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/tasks/1" \
-    -H "Authorization: Bearer $TOKEN" 2>/dev/null)
-  ok "DELETE /tasks/1 with admin token → HTTP $STATUS"
-else
-  fail "Could not obtain JWT token"
-fi
-
-NO_AUTH=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/tasks/2" 2>/dev/null)
-ok "DELETE /tasks/2 without token → HTTP $NO_AUTH (401 expected)"
-
-# ── 7. Worker ─────────────────────────────────────────────────────────────────
-section "7. Background Worker Logs"
+# ── 8. Worker ─────────────────────────────────────────────────────────────────
+section "8. Background Worker Logs"
 info "Last 5 worker log lines:"
 docker compose logs --tail=5 worker 2>/dev/null | sed 's/^/  /'
 
-# ── 8. Frontend ───────────────────────────────────────────────────────────────
-section "8. Frontend"
+# ── 9. Frontend ───────────────────────────────────────────────────────────────
+section "9. Frontend"
 ok "React app served by nginx → http://localhost"
 
 # ── Done ──────────────────────────────────────────────────────────────────────

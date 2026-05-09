@@ -35,11 +35,12 @@ User passwords are hashed with **bcrypt** via `passlib`. Plain-text passwords ar
 - Algorithm: **HS256**
 - Expiry: **30 minutes**
 - Secret key loaded from the `SECRET_KEY` environment variable (defaults to a dev placeholder — must be changed in any real deployment)
-- Protected route: `DELETE /tasks/{id}` — requires a valid JWT with `role: admin`
+- All task, preferences, and suggestions routes require a valid JWT
 
 ### Role-based access control
-Two roles: `admin` and `user`.  
-Only `admin` tokens can delete tasks. All other endpoints are public.
+Two roles: `admin` and `user` (stored on the `User` model for future extension).  
+All authenticated users can fully manage their own tasks and preferences.  
+Tasks and preferences are scoped per user — each user only sees their own data.
 
 ### JWT rotation steps
 To rotate the secret key (e.g. after a suspected compromise):
