@@ -15,6 +15,15 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers })
 
+  if (res.status === 401) {
+    // Token expired or invalid — clear session and redirect to login
+    authToken = null
+    localStorage.removeItem('focusly_token')
+    localStorage.removeItem('focusly_username')
+    window.location.href = '/login'
+    return undefined as T
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
     throw new Error(err.detail ?? 'Request failed')
