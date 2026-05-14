@@ -1,12 +1,12 @@
 # Focusly – Smart Daily Planner for Students
 
-Focusly is a smart task management app for students — track study, work, leisure, and personal tasks, manage your schedule preferences, and stay on top of your workload.
+Focusly is a smart task management app for students — track study, work, leisure, and personal tasks, manage your schedule preferences, and get AI-powered focus suggestions.
 
 **EX1** delivers the FastAPI backend with SQLite persistence, full CRUD for tasks and user preferences, task filtering, and a test suite.
 
 **EX2** adds a React + TypeScript frontend — a modern single-page app with a dark sidebar, dashboard overview, full task management (create, edit, delete, filter), and a preferences profile page.
 
-**EX3** integrates everything into a local multi-service stack: Docker Compose orchestrates five services (API, AI microservice, Redis, background worker, frontend), adds JWT-based authentication with bcrypt passwords, an async overdue-task worker with Redis idempotency, and an AI-powered "Today's Focus" feature powered by Google Gemma.
+**EX3** integrates everything into a local multi-service Docker Compose stack: JWT authentication with bcrypt passwords, PostgreSQL database, an async overdue-task worker with Redis idempotency, and an AI-powered "Today's Focus" feature powered by Google Gemma.
 
 ---
 
@@ -17,8 +17,8 @@ Focusly is a smart task management app for students — track study, work, leisu
 | Language | Python 3.12 |
 | Backend framework | FastAPI |
 | ORM | SQLModel |
-| Database | SQLite |
-| Tests | pytest + httpx |
+| Database | PostgreSQL 16 |
+| Tests | pytest + httpx (in-memory SQLite) |
 | Package manager | uv |
 | Frontend | React 18 + TypeScript |
 | Build tool | Vite |
@@ -32,49 +32,53 @@ Focusly is a smart task management app for students — track study, work, leisu
 
 ## Requirements
 
-- Python 3.12+
-- uv (package manager)
-- Node.js 18+ and npm (for the frontend)
+- Docker Desktop (includes Docker Compose)
+- A Google API key (for AI suggestions) — get one at https://aistudio.google.com
 
 ---
 
 ## Setup
 
 ```bash
-# 1. Install uv (if not already installed)
-#    https://docs.astral.sh/uv/getting-started/installation/
-#    Windows (PowerShell): powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# 2. Install backend dependencies
-uv sync --extra dev
-
-# 3. Install frontend dependencies
-cd frontend && npm install
+# 1. Copy the example env file and set your Google API key
+cp .env.example .env
+# Edit .env and fill in GOOGLE_API_KEY
 ```
 
 ---
 
 ## Run the App
 
-**Backend** (runs on port 8000):
 ```bash
-uv run uvicorn app.main:app --reload
+docker compose up --build
 ```
 
-API available at `http://localhost:8000`
-Interactive docs: `http://localhost:8000/docs`
+This starts five services:
 
-**Frontend** (runs on port 5173):
+| Service    | URL                        |
+|------------|----------------------------|
+| Frontend   | http://localhost           |
+| API        | http://localhost:8000      |
+| API docs   | http://localhost:8000/docs |
+| AI service | http://localhost:8001      |
+
+> First run takes longer — Docker builds all images. Subsequent runs use the cache.
+
+To run in the background:
 ```bash
-cd frontend && npm run dev
+docker compose up --build -d
 ```
 
-Open `http://localhost:5173` in your browser.
-> Both backend and frontend must be running at the same time.
+To stop:
+```bash
+docker compose down
+```
 
 ---
 
 ## Run Tests
+
+Tests use an in-memory SQLite database — no Docker needed:
 
 ```bash
 uv run pytest -v
@@ -85,7 +89,7 @@ uv run pytest -v
 ## Seed the Database
 
 ```bash
-uv run python scripts/seed.py
+docker compose exec api bash -c "cd /app && PYTHONPATH=/app uv run python scripts/seed.py"
 ```
 
 Populates the database with 5 sample tasks and 1 user preferences record.
@@ -93,19 +97,38 @@ The script is idempotent — running it twice will not duplicate data.
 
 ---
 
+## Demo Script
+
+Walks through health checks → register/login → seed → create task → AI suggestions → JWT auth → worker logs:
+
+```bash
+bash scripts/demo.sh
+```
+
+---
+
 ## Endpoints
 
 ### Health
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Check if the API is running |
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/health` | No | Check if the API is running |
+
+### Auth
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/auth/register` | No | Register a new user |
+| POST | `/auth/token` | No | Login — returns JWT token |
 
 ### Tasks
 
+All task endpoints require a valid JWT (`Authorization: Bearer <token>`).
+
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/tasks` | List tasks (supports filtering) |
+| GET | `/tasks` | List your tasks (supports filtering) |
 | GET | `/tasks/{id}` | Get task by ID |
 | POST | `/tasks` | Create task |
 | PUT | `/tasks/{id}` | Update task |
@@ -123,23 +146,43 @@ Example: `GET /tasks?status=todo&priority=high`
 
 ### Preferences
 
+All preferences endpoints require a valid JWT.
+
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/preferences` | List all preferences |
+| GET | `/preferences` | List your preferences |
 | GET | `/preferences/{id}` | Get preferences by ID |
 | POST | `/preferences` | Create preferences |
 | PUT | `/preferences/{id}` | Update preferences |
 | DELETE | `/preferences/{id}` | Delete preferences |
 
+### Suggestions
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/suggestions` | Yes | AI-powered task focus suggestions (Gemma) |
+
 ---
 
 ## Example Requests
+
+### Register and login
+
+```bash
+curl -X POST http://localhost:8000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "secret123", "role": "user"}'
+
+TOKEN=$(curl -s -X POST http://localhost:8000/auth/token \
+  -d "username=alice&password=secret123" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+```
 
 ### Create a task
 
 ```bash
 curl -X POST http://localhost:8000/tasks \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "title": "Finish OS homework",
     "description": "Solve scheduling exercises",
@@ -154,23 +197,14 @@ curl -X POST http://localhost:8000/tasks \
 ### Filter tasks
 
 ```bash
-curl "http://localhost:8000/tasks?status=todo&priority=high"
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8000/tasks?status=todo&priority=high"
 ```
 
-### Create user preferences
+### Get AI suggestions
 
 ```bash
-curl -X POST http://localhost:8000/preferences \
-  -H "Content-Type: application/json" \
-  -d '{
-    "display_name": "Alice",
-    "age": 22,
-    "work_start_hour": 9,
-    "work_end_hour": 18,
-    "preferred_study_hours_per_day": 5,
-    "preferred_break_minutes": 15,
-    "peak_focus_time": "morning"
-  }'
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/suggestions
 ```
 
 ---
@@ -181,30 +215,46 @@ curl -X POST http://localhost:8000/preferences \
 focusly/
 ├── app/
 │   ├── main.py          # FastAPI app, router registration, lifespan, CORS
-│   ├── db.py            # SQLite engine and session
-│   ├── models.py        # SQLModel database models + enums
+│   ├── db.py            # Database engine (PostgreSQL in Docker, SQLite for tests)
+│   ├── models.py        # SQLModel database models + enums (Task, User, UserPreferences)
 │   ├── schemas.py       # Pydantic request/response schemas with validation
 │   ├── repositories.py  # Database access functions
 │   ├── services.py      # Business logic layer
 │   └── routers/
-│       ├── tasks.py        # /tasks endpoints
-│       └── preferences.py  # /preferences endpoints
+│       ├── auth.py         # /auth/register and /auth/token
+│       ├── tasks.py        # /tasks endpoints (JWT protected)
+│       ├── preferences.py  # /preferences endpoints (JWT protected)
+│       └── suggestions.py  # /suggestions endpoint (JWT protected)
+├── ai_service/
+│   └── main.py          # Standalone FastAPI service — calls Google Gemma
 ├── frontend/
 │   ├── src/
 │   │   ├── api/            # API client + endpoint functions
-│   │   ├── components/     # UI components (layout, tasks, dashboard, common)
+│   │   ├── components/     # UI components (layout, tasks, dashboard, auth, common)
+│   │   ├── context/        # AuthContext (JWT token + login/logout)
 │   │   ├── hooks/          # useTasks, usePreferences
-│   │   ├── pages/          # DashboardPage, TasksPage, PreferencesPage
+│   │   ├── pages/          # Dashboard, Tasks, Preferences, Login, Register
 │   │   ├── types/          # TypeScript interfaces mirroring backend schemas
 │   │   └── utils/          # formatters (date, time, duration)
 │   ├── index.html
 │   └── vite.config.ts      # Proxies /api → http://localhost:8000
-├── tests/
-│   ├── conftest.py      # Test fixtures (in-memory SQLite, TestClient)
-│   ├── test_tasks.py    # Task CRUD + filtering tests
-│   └── test_preferences.py  # Preferences CRUD + validation tests
 ├── scripts/
-│   └── seed.py          # Sample data seed script
+│   ├── seed.py          # Sample data seed script
+│   ├── refresh.py       # Async background worker (overdue task detector)
+│   └── demo.sh          # End-to-end demo walkthrough
+├── tests/
+│   ├── conftest.py      # Test fixtures (in-memory SQLite, TestClient, auth_headers)
+│   ├── test_tasks.py    # Task CRUD + filtering + auth tests
+│   ├── test_preferences.py  # Preferences CRUD + validation tests
+│   ├── test_auth.py     # JWT auth, ownership enforcement tests
+│   └── test_suggestions.py  # AI suggestions endpoint tests
+├── docs/
+│   ├── EX3-notes.md     # Architecture overview, security baseline, worker trace
+│   └── runbooks/
+│       └── compose.md   # Docker Compose runbook
+├── compose.yaml         # All five services: api, ai_service, postgres, redis, frontend
+├── Dockerfile           # API + worker image
+├── .env.example         # Environment variable template
 ├── pyproject.toml
 └── README.md
 ```
@@ -217,14 +267,13 @@ This project was developed with assistance from Claude (Anthropic).
 
 **How AI was used:**
 - Bouncing ideas on project structure and design decisions
-- Getting feedback on validation rules and edge cases
-- Clarifying FastAPI and SQLModel patterns during development
+- Getting feedback on validation logic and edge cases
+- Clarifying FastAPI, SQLModel, and React patterns during development
 - Designing the UI layout (sidebar, dashboard, task cards, filter bar, preferences form)
-- Architecting the EX3 multi-service stack (Docker Compose, async worker, JWT auth, AI microservice)
+- Architecting the EX3 multi-service stack (Docker Compose, async worker, JWT auth, AI microservice, PostgreSQL migration)
 
 **How outputs were verified:**
 - All code was reviewed and understood before being included
-- Tests were run locally with `uv run pytest -v` to confirm everything passes
-- Endpoints were manually tested via the Swagger UI at `/docs`
-- Frontend unit tests run with `npm run test` (21 tests passing)
-- All backend tests run with `uv run pytest -v` (39 tests passing)
+- Backend tests run with `uv run pytest -v` (all passing, use in-memory SQLite)
+- Endpoints manually tested via Swagger UI at `http://localhost:8000/docs`
+- Full stack verified end-to-end with `bash scripts/demo.sh`
