@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
-from app.auth import create_access_token, hash_password, verify_password
+from app.auth import create_access_token, hash_password, require_admin, verify_password
 from app.db import get_session
 from app.models import Role, User
 
@@ -51,3 +51,15 @@ def login(
         )
     token = create_access_token({"sub": user.username, "role": user.role})
     return TokenResponse(access_token=token)
+
+
+# ── Admin endpoints ───────────────────────────────────────────────────────────
+
+@router.get("/admin/users", tags=["admin"])
+def list_users(
+    session: Session = Depends(get_session),
+    _admin: User = Depends(require_admin),
+):
+    """List all registered users. Admin role required."""
+    users = session.exec(select(User)).all()
+    return [{"id": u.id, "username": u.username, "role": u.role} for u in users]

@@ -97,6 +97,30 @@ def test_user_cannot_delete_another_users_task(client: TestClient):
     assert response.status_code == 404
 
 
+# ── Role checks ───────────────────────────────────────────────────────────────
+
+def test_admin_can_list_users(client: TestClient):
+    """Admin role → GET /auth/admin/users returns 200 with user list."""
+    token = register_and_login(client, "superadmin", "pass123", role="admin")
+    response = client.get("/auth/admin/users", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    usernames = [u["username"] for u in response.json()]
+    assert "superadmin" in usernames
+
+
+def test_user_role_cannot_list_users(client: TestClient):
+    """Regular user role → GET /auth/admin/users returns 403."""
+    token = register_and_login(client, "regularuser", "pass123", role="user")
+    response = client.get("/auth/admin/users", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
+
+
+def test_unauthenticated_cannot_list_users(client: TestClient):
+    """No token → GET /auth/admin/users returns 401."""
+    response = client.get("/auth/admin/users")
+    assert response.status_code == 401
+
+
 def test_expired_token(client: TestClient):
     """Expired token → 401."""
     token = register_and_login(client, "dave", "pass123")
